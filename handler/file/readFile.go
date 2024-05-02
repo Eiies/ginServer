@@ -10,7 +10,7 @@ import (
 )
 
 func ReadFile(c *gin.Context) {
-
+	c.Header(AccessControlHeader, "*") // 允许跨域请求
 	// 存储文件名与文件内容的对应关系
 	fileMap := make(map[string]string)
 
