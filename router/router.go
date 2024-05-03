@@ -13,10 +13,19 @@ func SetupRouter() *gin.Engine {
 	router.Use(corsMiddleware())
 	// api 主路由
 	api := router.Group("/api")
-	{
-		// 主路由下的子路由 /upload
-		api.POST("/upload", handler.UploadFile)
-		api.GET("/readfile", handler.ReadFile)
+	{ // 主路由下的子路由 /upload
+		uploadGroup := api.Group("/upload")
+		{
+			uploadGroup.POST("", handler.UploadFile)          // /api/upload
+			uploadGroup.POST("/images", handler.UploadImages) // /api/upload/images
+		}
+
+		// 主路由下的子路由 /image
+		imageGroup := api.Group("/image")
+		{
+			imageGroup.GET("", handler.ReadImages)          // /api/image
+			imageGroup.GET("/json", handler.ReadImagesJSON) // /api/image/json
+		}
 
 	}
 	// 给网页返回一个 favicon.ico

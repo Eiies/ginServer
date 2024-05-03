@@ -11,7 +11,7 @@ func main() {
 	r := router.SetupRouter()
 	// 输出本机 IP
 	for _, ip := range handler.GetLocalIPv4() {
-		fmt.Printf("\nhttp://%v\n", ip)
+		fmt.Printf("\nhttp://%v:9090/api\n", ip)
 	}
 	// 启动服务，端口为 9090
 	err := r.Run(fmt.Sprintf(":%d", 9090))

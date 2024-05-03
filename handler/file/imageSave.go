@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"goServer/db"
 	"io"
 	"log"
 	"mime/multipart"
@@ -13,25 +14,26 @@ import (
 // FolderPath 文件夹路径
 const FolderPath = "./uploads"
 
+// SaveFile 保存文件
 func SaveFile(fileHeader *multipart.FileHeader) (string, string, error) {
-	folder := FolderPath
 
 	// 获取上传文件的原始文件名和后缀
-	originalFileName := fileHeader.Filename
-	fileExt := filepath.Ext(originalFileName)
+	fileExt := filepath.Ext(fileHeader.Filename)
+	timeName := time.Now().UnixNano()
 
 	// 基于时间戳生成文件名
-	fileName := fmt.Sprintf("%d%s", time.Now().UnixNano(), fileExt)
+	FileName := fmt.Sprintf("%d%s", timeName, fileExt)
+
 	// 检查文件夹是否存在，不存在则创建
-	if _, err := os.Stat(folder); os.IsNotExist(err) {
-		err := os.MkdirAll(folder, 0755)
+	if _, err := os.Stat(FolderPath); os.IsNotExist(err) {
+		err := os.MkdirAll(FolderPath, 0755)
 		if err != nil {
 			log.Fatalln("无法创建文件夹：", err)
 		}
 	}
 
 	// 创建目标文件
-	dst, err := os.Create(fmt.Sprintf("%s/%s", folder, fileName))
+	dst, err := os.Create(fmt.Sprintf("%s/%s", FolderPath, FileName))
 	if err != nil {
 		log.Fatalln("创建文件失败", err)
 	}
@@ -55,5 +57,7 @@ func SaveFile(fileHeader *multipart.FileHeader) (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
-	return folder, fileName, nil
+
+	db.LogocalDatabase(filepath.Join(dst.Name())) // 将文件路径储存到本地
+	return FolderPath, FileName, nil
 }
