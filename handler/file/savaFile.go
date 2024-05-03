@@ -1,13 +1,12 @@
 package handler
 
 import (
-	"encoding/base64"
 	"fmt"
 	"io"
 	"log"
 	"mime/multipart"
 	"os"
-	"strconv"
+	"path/filepath"
 	"time"
 )
 
@@ -16,8 +15,13 @@ const FolderPath = "./uploads"
 
 func SaveFile(fileHeader *multipart.FileHeader) (string, string, error) {
 	folder := FolderPath
+
+	// 获取上传文件的原始文件名和后缀
+	originalFileName := fileHeader.Filename
+	fileExt := filepath.Ext(originalFileName)
+
 	// 基于时间戳生成文件名
-	fileName := strconv.FormatInt(time.Now().UnixNano(), 10)
+	fileName := fmt.Sprintf("%d%s", time.Now().UnixNano(), fileExt)
 	// 检查文件夹是否存在，不存在则创建
 	if _, err := os.Stat(folder); os.IsNotExist(err) {
 		err := os.MkdirAll(folder, 0755)
@@ -41,15 +45,15 @@ func SaveFile(fileHeader *multipart.FileHeader) (string, string, error) {
 	}
 	defer src.Close()
 
-	// 将上传的文件内容复制到目标文件，并同时保存为Base64编码
+	/* 将上传的文件内容复制到目标文件，并同时保存为Base64编码
 	encoder := base64.NewEncoder(base64.StdEncoding, dst)
 	defer encoder.Close()
+	*/
 
-	// 将上传的文件内容复制到Base64编码器中
-	_, err = io.Copy(encoder, src)
+	// 将上传的文件内容复制
+	_, err = io.Copy(dst, src)
 	if err != nil {
 		return "", "", err
 	}
-
 	return folder, fileName, nil
 }
